@@ -1320,8 +1320,8 @@ module.exports = [
   },
   {
     permanent: true,
-    source: '/docs/guides/realtime/postgres-changes',
-    destination: '/docs/guides/realtime/postgres-cdc',
+    source: '/docs/guides/realtime/postgres-cdc',
+    destination: '/docs/guides/realtime/postgres-changes',
   },
   {
     permanent: true,
@@ -1559,5 +1559,10 @@ module.exports = [
     permanent: true,
     source: '/forgot-password',
     destination: 'https://app.supabase.com/forgot-password',
+  },
+  {
+    permanent: true,
+    source: '/docs/guides/functions/examples',
+    destination: '/docs/guides/functions',
   },
 ]

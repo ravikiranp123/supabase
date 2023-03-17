@@ -15,6 +15,7 @@ export interface IPostgresMetaInterface<T> {
   isInitialized: boolean
 
   load: () => void
+  loadBySchema: (schema: string) => Promise<T[] | { error: ResponseError }>
   create: (payload: any) => Promise<T | { error: ResponseError }>
   update: (id: number | string, updates: any) => Promise<T | { error: ResponseError }>
   del: (id: number | string, cascade?: boolean) => Promise<boolean | { error: ResponseError }>
@@ -116,6 +117,41 @@ export default class PostgresMetaInterface<T> implements IPostgresMetaInterface<
     }
   }
 
+  // [Joshen] Only used for tables and views for now
+  async loadBySchema(schema: string) {
+    let { LOADING, ERROR, LOADED } = this.STATES
+    try {
+      this.setError(null)
+      this.setState(LOADING)
+
+      const url = this.url.includes('?')
+        ? `${this.url}&included_schemas=${schema}`
+        : `${this.url}?included_schemas=${schema}`
+      const response = await get(url, { headers: this.headers })
+      if (response.error) throw response.error
+
+      const data = response as T[]
+      const formattedData = keyBy(data, this.identifier)
+
+      // Purge existing data that belongs to given schema, otherwise
+      // stale data will persist
+      const purgedData = Object.keys(this.data)
+        .map((identifier: any) => this.data[identifier])
+        .filter((item: any) => item.schema !== schema)
+      const formattedPurgedData = keyBy(purgedData, this.identifier)
+
+      this.data = { ...formattedPurgedData, ...formattedData }
+      this.setState(LOADED)
+
+      return data
+    } catch (error: any) {
+      console.error('Error in loadBySchema:', error.message)
+      this.setError(error)
+      this.setState(ERROR)
+      return { error }
+    }
+  }
+
   initialDataArray(value: T[]) {
     if (this.state === this.STATES.INITIAL) {
       this.data = keyBy(value, this.identifier)
@@ -172,10 +208,9 @@ export default class PostgresMetaInterface<T> implements IPostgresMetaInterface<
     }
   }
 
-  async update(id: number | string, updates: any) {
+  async update(id: number | string, payload: any) {
     try {
       const headers = { 'Content-Type': 'application/json', ...this.headers }
-      let payload = { ...updates, id }
       const url = `${this.url}?id=${id}`
       const response = await patch<T>(url, payload, { headers })
       if (response.error) throw response.error

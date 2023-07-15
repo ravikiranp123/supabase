@@ -4,7 +4,7 @@ import ApiExamplesData from 'data/products/database/api-examples'
 import ExtensionsExamplesData from 'data/products/database/extensions-examples'
 import SqlViewCarouselData from 'data/products/database/sql-view-carousel.json'
 import TableViewCarouselData from 'data/products/database/table-view-carousel.json'
-import Solutions from 'data/Solutions.json'
+import Solutions from 'data/Solutions'
 import { NextSeo } from 'next-seo'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -298,9 +298,11 @@ function Database() {
                 text="We only show a few of the extensions supported by supabase here, but we preinstall many more that you can use right away."
               />
               <Link href="/docs/guides/database" passHref>
-                <Button as="a" size="small" type="default" icon={<IconArrowUpRight />}>
-                  Explore documentation
-                </Button>
+                <a>
+                  <Button size="small" type="default" icon={<IconArrowUpRight />}>
+                    Explore documentation
+                  </Button>
+                </a>
               </Link>
             </div>
             <div className="col-span-12 mt-8 lg:col-span-6 lg:col-start-7 lg:mt-0">

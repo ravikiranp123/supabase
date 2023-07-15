@@ -1,19 +1,20 @@
-import { Button, Dropdown, IconChevronDown, IconPlay, Badge, Popover, Alert } from 'ui'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { PermissionAction } from '@supabase/shared-types/out/constants'
+import { Alert, Badge, Button, Dropdown, IconChevronDown, IconPlay, Popover } from 'ui'
 
-import {
-  EXPLORER_DATEPICKER_HELPERS,
-  LogsTableName,
-  LogsWarning,
-  LOGS_SOURCE_DESCRIPTION,
-  LogTemplate,
-} from '.'
-import DatePickers from './Logs.DatePickers'
+import { useCheckPermissions } from 'hooks'
+import { IS_PLATFORM } from 'lib/constants'
+import { useProfile } from 'lib/profile'
 import Link from 'next/link'
 import React from 'react'
-import { checkPermissions } from 'hooks'
-import { useProfileQuery } from 'data/profile/profile-query'
+import {
+  EXPLORER_DATEPICKER_HELPERS,
+  LOGS_SOURCE_DESCRIPTION,
+  LogTemplate,
+  LogsTableName,
+  LogsWarning,
+} from '.'
+import DatePickers from './Logs.DatePickers'
 
 export interface LogsQueryPanelProps {
   templates?: LogTemplate[]
@@ -44,8 +45,8 @@ const LogsQueryPanel = ({
   onDateChange,
   warnings,
 }: LogsQueryPanelProps) => {
-  const { data: profile } = useProfileQuery()
-  const canCreateLogQuery = checkPermissions(PermissionAction.CREATE, 'user_content', {
+  const { profile } = useProfile()
+  const canCreateLogQuery = useCheckPermissions(PermissionAction.CREATE, 'user_content', {
     resource: { type: 'log_sql', owner_id: profile?.id },
     subject: { id: profile?.id },
   })
@@ -69,8 +70,8 @@ const LogsQueryPanel = ({
                   </Dropdown.Item>
                 ))}
             >
-              <Button as="span" type="default" iconRight={<IconChevronDown />}>
-                Insert source
+              <Button asChild type="default" iconRight={<IconChevronDown />}>
+                <span>Insert source</span>
               </Button>
             </Dropdown>
 
@@ -85,8 +86,8 @@ const LogsQueryPanel = ({
                   </Dropdown.Item>
                 ))}
             >
-              <Button as="span" type="default" iconRight={<IconChevronDown />}>
-                Templates
+              <Button asChild type="default" iconRight={<IconChevronDown />}>
+                <span>Templates</span>
               </Button>
             </Dropdown>
             <DatePickers
@@ -102,7 +103,6 @@ const LogsQueryPanel = ({
                 }`}
               >
                 <Popover
-                  portalled
                   overlay={
                     <Alert variant="warning" title="">
                       <div className="flex flex-col gap-3">
@@ -131,7 +131,7 @@ const LogsQueryPanel = ({
                 <Button type="default" onClick={onClear}>
                   Clear query
                 </Button>
-                {onSave && (
+                {IS_PLATFORM && onSave && (
                   <Tooltip.Root delayDuration={0}>
                     <Tooltip.Trigger>
                       <Button
@@ -143,19 +143,21 @@ const LogsQueryPanel = ({
                       </Button>
                     </Tooltip.Trigger>
                     {!canCreateLogQuery && (
-                      <Tooltip.Content side="bottom">
-                        <Tooltip.Arrow className="radix-tooltip-arrow" />
-                        <div
-                          className={[
-                            'rounded bg-scale-100 py-1 px-2 leading-none shadow',
-                            'border border-scale-200',
-                          ].join(' ')}
-                        >
-                          <span className="text-xs text-scale-1200">
-                            You need additional permissions to save your query
-                          </span>
-                        </div>
-                      </Tooltip.Content>
+                      <Tooltip.Portal>
+                        <Tooltip.Content side="bottom">
+                          <Tooltip.Arrow className="radix-tooltip-arrow" />
+                          <div
+                            className={[
+                              'rounded bg-scale-100 py-1 px-2 leading-none shadow',
+                              'border border-scale-200',
+                            ].join(' ')}
+                          >
+                            <span className="text-xs text-scale-1200">
+                              You need additional permissions to save your query
+                            </span>
+                          </div>
+                        </Tooltip.Content>
+                      </Tooltip.Portal>
                     )}
                   </Tooltip.Root>
                 )}

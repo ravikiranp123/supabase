@@ -2,12 +2,13 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { ComponentType, useEffect } from 'react'
 
+import { useParams } from 'common/hooks'
 import { usePermissionsQuery } from 'data/permissions/permissions-query'
-import { useParams, useStore } from 'hooks'
+import { useSelectedProject, useStore } from 'hooks'
 import { useAuth } from 'lib/auth'
 import { IS_PLATFORM } from 'lib/constants'
-import { getReturnToPath, STORAGE_KEY } from 'lib/gotrue'
-import { isNextPageWithLayout, NextPageWithLayout } from 'types'
+import { STORAGE_KEY, getReturnToPath } from 'lib/gotrue'
+import { NextPageWithLayout, isNextPageWithLayout } from 'types'
 import Error500 from '../../pages/500'
 
 const PLATFORM_ONLY_PAGES = [
@@ -28,25 +29,24 @@ export function withAuth<T>(
 ) {
   const WithAuthHOC: ComponentType<T> = (props: any) => {
     const router = useRouter()
-    const { ref, slug } = useParams()
+    const { basePath } = router
+    const { ref } = useParams()
     const rootStore = useStore()
     const { isLoading, session } = useAuth()
 
-    const { app, ui } = rootStore
+    const { ui } = rootStore
     const page = router.pathname.split('/').slice(3).join('/')
 
     const redirectTo = options?.redirectTo ?? defaultRedirectTo(ref)
     const redirectIfFound = options?.redirectIfFound
 
-    useEffect(() => {
-      if (!app.organizations.isInitialized) app.organizations.load()
-      if (!app.projects.isInitialized) app.projects.load()
-    }, [app.organizations.isInitialized, app.projects.isInitialized])
-
     usePermissionsQuery({
-      enabled: IS_PLATFORM,
-      onSuccess(permissions) {
-        ui.setPermissions(permissions)
+      onError(error: any) {
+        ui.setNotification({
+          error,
+          category: 'error',
+          message: `Failed to fetch permissions: ${error.message}. Try refreshing your browser, or reach out to us via a support ticket if the issue persists`,
+        })
       },
     })
 
@@ -66,14 +66,12 @@ export function withAuth<T>(
       }
     }, [isRedirecting, redirectTo])
 
+    const selectedProject = useSelectedProject()
     useEffect(() => {
-      if (router.isReady) {
-        if (ref) {
-          rootStore.setProjectRef(ref)
-        }
-        rootStore.setOrganizationSlug(slug)
+      if (selectedProject) {
+        rootStore.setProject(selectedProject)
       }
-    }, [isLoading, router.isReady, ref, slug])
+    }, [selectedProject])
 
     if (!isLoading && !isRedirecting && !isLoggedIn) {
       return <Error500 />
@@ -87,7 +85,9 @@ export function withAuth<T>(
           {IS_PLATFORM && (
             <script
               dangerouslySetInnerHTML={{
-                __html: `window._getReturnToPath = ${getReturnToPath.toString()};if (!localStorage.getItem('${STORAGE_KEY}') && !location.hash) {const searchParams = new URLSearchParams(location.search);searchParams.set('returnTo', location.pathname);location.replace('/sign-in' + '?' + searchParams.toString())}`,
+                __html: `window._getReturnToPath = ${getReturnToPath.toString()};if (!localStorage.getItem('${STORAGE_KEY}') && !location.hash) {const searchParams = new URLSearchParams(location.search);searchParams.set('returnTo', location.pathname);location.replace('${
+                  basePath ?? ''
+                }/sign-in' + '?' + searchParams.toString())}`,
               }}
             />
           )}
@@ -107,7 +107,7 @@ export function withAuth<T>(
 }
 
 function defaultRedirectTo(ref: string | string[] | undefined) {
-  return IS_PLATFORM ? '/sign-in' : ref !== undefined ? `/project/${ref}` : '/projects'
+  return IS_PLATFORM ? `/sign-in` : ref !== undefined ? `/project/${ref}` : '/projects'
 }
 
 function checkRedirectTo(

@@ -1,19 +1,25 @@
-import { useState } from 'react'
-import router from 'next/router'
-import { observer } from 'mobx-react-lite'
-import { isUndefined } from 'lodash'
 import type { PostgresTable } from '@supabase/postgres-meta'
+import { isUndefined } from 'lodash'
+import { observer } from 'mobx-react-lite'
+import router from 'next/router'
+import { useState } from 'react'
 
-import { NextPageWithLayout } from 'types'
-import { useStore, withAuth } from 'hooks'
-import { TableEditorLayout } from 'components/layouts'
 import { EmptyState, SidePanelEditor } from 'components/interfaces/TableGridEditor'
+import { TableEditorLayout } from 'components/layouts'
+import {
+  ProjectContextFromParamsProvider,
+  useProjectContext,
+} from 'components/layouts/ProjectLayout/ProjectContext'
 import ConfirmationModal from 'components/ui/ConfirmationModal'
-import { ProjectContextFromParamsProvider } from 'components/layouts/ProjectLayout/ProjectContext'
+import { Entity } from 'data/entity-types/entity-type-query'
+import { useStore, withAuth } from 'hooks'
+import { NextPageWithLayout } from 'types'
 
 const TableEditorPage: NextPageWithLayout = () => {
   const { meta, ui } = useStore()
-  const projectRef = ui.selectedProject?.ref
+  const { project } = useProjectContext()
+  const projectRef = project?.ref
+
   const [sidePanelKey, setSidePanelKey] = useState<'row' | 'column' | 'table'>()
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
   const [isDuplicating, setIsDuplicating] = useState<boolean>(false)
@@ -27,20 +33,26 @@ const TableEditorPage: NextPageWithLayout = () => {
     setSelectedTableToEdit(undefined)
   }
 
-  const onEditTable = (table: PostgresTable) => {
+  const onEditTable = (entity: Entity) => {
     setSidePanelKey('table')
     setIsDuplicating(false)
+
+    const table = meta.tables.byId(entity.id)
     setSelectedTableToEdit(table)
   }
 
-  const onDeleteTable = (table: PostgresTable) => {
+  const onDeleteTable = (entity: Entity) => {
     setIsDeleting(true)
+
+    const table = meta.tables.byId(entity.id)
     setSelectedTableToDelete(table)
   }
 
-  const onDuplicateTable = (table: PostgresTable) => {
+  const onDuplicateTable = (entity: Entity) => {
     setSidePanelKey('table')
     setIsDuplicating(true)
+
+    const table = meta.tables.byId(entity.id)
     setSelectedTableToEdit(table)
   }
 

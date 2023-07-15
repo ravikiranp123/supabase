@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { IconChevronRight } from 'ui'
 import { withAuth, useFlag } from 'hooks'
 import { observer } from 'mobx-react-lite'
+import { BASE_PATH } from 'lib/constants'
+import HelpPopover from './ProjectLayout/LayoutHeader/HelpPopover'
+import FeedbackDropdown from './ProjectLayout/LayoutHeader/FeedbackDropdown'
 
 const WizardLayout: FC<any> = ({ organization, project, children }) => {
   const ongoingIncident = useFlag('ongoingIncident')
@@ -35,7 +38,7 @@ const Header: FC<any> = ({ organization, project }) => {
               <Link href="/projects">
                 <a>
                   <img
-                    src="/img/supabase-logo.svg"
+                    src={`${BASE_PATH}/img/supabase-logo.svg`}
                     alt="Supabase"
                     className="rounded border p-1 hover:border-white dark:border-dark"
                     style={{ height: 24 }}
@@ -56,7 +59,11 @@ const Header: FC<any> = ({ organization, project }) => {
               </p>
             </div>
           </div>
-          <div className="flex">{/* End */}</div>
+          <div className="flex">{/* The End */}</div>
+          <div className="flex items-center space-x-2">
+            <HelpPopover />
+            <FeedbackDropdown />
+          </div>
         </div>
       </div>
     </div>

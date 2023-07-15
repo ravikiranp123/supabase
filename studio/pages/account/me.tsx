@@ -1,15 +1,17 @@
 import { observer } from 'mobx-react-lite'
-import { Button, IconMoon, IconSun, Input, Listbox } from 'ui'
+import Link from 'next/link'
 
+import { useTheme } from 'common'
 import { AccountLayout } from 'components/layouts'
 import SchemaFormPanel from 'components/to-be-cleaned/forms/SchemaFormPanel'
 import Panel from 'components/ui/Panel'
-import { Profile as ProfileType, useProfileQuery } from 'data/profile/profile-query'
 import { useProfileUpdateMutation } from 'data/profile/profile-update-mutation'
+import { Profile as ProfileType } from 'data/profile/types'
 import { useStore } from 'hooks'
 import { useSession } from 'lib/auth'
-import Link from 'next/link'
+import { useProfile } from 'lib/profile'
 import { NextPageWithLayout } from 'types'
+import { Button, IconMoon, IconSun, Input, Listbox } from 'ui'
 
 const User: NextPageWithLayout = () => {
   return (
@@ -21,7 +23,7 @@ const User: NextPageWithLayout = () => {
 
 User.getLayout = (page) => (
   <AccountLayout
-    title="Supabase"
+    title="Preferences"
     breadcrumbs={[
       {
         key: `supabase-settings`,
@@ -39,7 +41,7 @@ const ProfileCard = observer(() => {
   const { ui } = useStore()
   const { mutateAsync } = useProfileUpdateMutation()
 
-  const { data: profile } = useProfileQuery()
+  const { profile } = useProfile()
   // TODO: ^ handle loading state
 
   const updateUser = async (model: any) => {
@@ -142,29 +144,24 @@ const Profile = ({ profile }: { profile?: ProfileType }) => {
 }
 
 const ThemeSettings = observer(() => {
-  const { ui } = useStore()
+  const { isDarkMode, toggleTheme } = useTheme()
 
   return (
     <Panel title={<h5 key="panel-title">Theme</h5>}>
       <Panel.Content>
         <Listbox
-          value={ui.themeOption}
+          value={isDarkMode ? 'dark' : 'light'}
           label="Interface theme"
           descriptionText="Choose a theme preference"
           layout="horizontal"
           style={{ width: '50%' }}
-          icon={
-            ui.themeOption === 'light' ? (
-              <IconSun />
-            ) : ui.themeOption === 'dark' ? (
-              <IconMoon />
-            ) : undefined
-          }
-          onChange={(themeOption: any) => ui.onThemeOptionChange(themeOption)}
+          icon={isDarkMode ? <IconMoon /> : <IconSun />}
+          onChange={(themeOption: any) => toggleTheme(themeOption === 'dark')}
         >
-          <Listbox.Option label="System default" value="system">
+          {/* [Joshen] Removing system default for now, needs to be supported in useTheme from common packages */}
+          {/* <Listbox.Option label="System default" value="system">
             System default
-          </Listbox.Option>
+          </Listbox.Option> */}
           <Listbox.Option label="Dark" value="dark">
             Dark
           </Listbox.Option>

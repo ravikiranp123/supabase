@@ -1,10 +1,10 @@
 import { FC, ReactNode, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/router'
-import { useStore, withAuth } from 'hooks'
+import { useFlag, useSelectedOrganization, useSelectedProject, useStore, withAuth } from 'hooks'
 import { generateSettingsMenu } from './SettingsMenu.utils'
 
-import BaseLayout from '../'
+import ProjectLayout from '../'
 import ProductMenu from 'components/ui/ProductMenu'
 
 interface Props {
@@ -14,8 +14,9 @@ interface Props {
 
 const SettingsLayout: FC<Props> = ({ title, children }) => {
   const { ui, meta } = useStore()
-  const projectRef = ui.selectedProjectRef as string
-  const projectBaseInfo = ui.selectedProjectBaseInfo
+  const project = useSelectedProject()
+  const organization = useSelectedOrganization()
+  const isOrgBilling = !!organization?.subscription_id
 
   const router = useRouter()
   // billing pages live under /billing/invoices and /billing/subscription, etc
@@ -24,16 +25,22 @@ const SettingsLayout: FC<Props> = ({ title, children }) => {
     ? router.pathname.split('/')[5]
     : router.pathname.split('/')[4]
 
-  const menuRoutes = generateSettingsMenu(projectRef, projectBaseInfo)
+  const isVaultEnabled = useFlag('vaultExtension')
+  const menuRoutes = generateSettingsMenu(
+    project?.ref as string,
+    project,
+    isVaultEnabled,
+    isOrgBilling
+  )
 
   useEffect(() => {
-    if (ui.selectedProject?.ref) {
+    if (ui.selectedProjectRef) {
       meta.extensions.load()
     }
-  }, [ui.selectedProject?.ref])
+  }, [ui.selectedProjectRef])
 
   return (
-    <BaseLayout
+    <ProjectLayout
       title={title || 'Settings'}
       product="Settings"
       productMenu={<ProductMenu page={page} menu={menuRoutes} />}
@@ -41,7 +48,7 @@ const SettingsLayout: FC<Props> = ({ title, children }) => {
       <main style={{ maxHeight: '100vh' }} className="flex-1 overflow-y-auto">
         {children}
       </main>
-    </BaseLayout>
+    </ProjectLayout>
   )
 }
 

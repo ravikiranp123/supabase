@@ -12,7 +12,7 @@ import {
   IconBox,
   IconCode,
   IconDatabase,
-  IconZapOff,
+  IconZap,
 } from 'ui'
 import DatePickers from '../Settings/Logs/Logs.DatePickers'
 import { REPORTS_DATEPICKER_HELPERS } from './Reports.constants'
@@ -59,7 +59,7 @@ const PRODUCT_FILTERS = [
     filterValue: '/realtime',
     label: 'Realtime',
     description: 'Realtime connection requests',
-    icon: IconZapOff,
+    icon: IconZap,
   },
   // TODO: support functions once union parsing is fixed
   // {
@@ -99,7 +99,7 @@ const ReportFilterBar: FC<Props> = ({
   ]
   const [showAdder, setShowAdder] = useState(false)
   const [currentProductFilter, setCurrentProductFilter] = useState<
-    null | typeof PRODUCT_FILTERS[number]
+    null | (typeof PRODUCT_FILTERS)[number]
   >(null)
   const [addFilterValues, setAddFilterValues] = useState<ReportFilterItem>({
     key: filterKeys[0],
@@ -116,7 +116,7 @@ const ReportFilterBar: FC<Props> = ({
   }
 
   const handleProductFilterChange = async (
-    nextProductFilter: null | typeof PRODUCT_FILTERS[number]
+    nextProductFilter: null | (typeof PRODUCT_FILTERS)[number]
   ) => {
     const toRemove = PRODUCT_FILTERS.map(
       (productFilter) =>
@@ -156,6 +156,7 @@ const ReportFilterBar: FC<Props> = ({
                 All Requests
               </Dropdown.Item>
               <Dropdown.Separator />
+
               {PRODUCT_FILTERS.map((productFilter) => {
                 const Icon = productFilter.icon
                 return (
@@ -163,7 +164,6 @@ const ReportFilterBar: FC<Props> = ({
                     key={productFilter.key}
                     disabled={productFilter.key === currentProductFilter?.key}
                     onClick={() => handleProductFilterChange(productFilter)}
-                    className="hover:bg-scale-600"
                     icon={<Icon size={20} className="mr-2" />}
                   >
                     <p
@@ -184,12 +184,14 @@ const ReportFilterBar: FC<Props> = ({
           }
         >
           <Button
-            as="span"
+            asChild
             type="default"
             className="inline-flex flex-row gap-2"
             iconRight={<IconChevronDown size={14} />}
           >
-            {currentProductFilter === null ? 'All Requests' : currentProductFilter.label}
+            <span>
+              {currentProductFilter === null ? 'All Requests' : currentProductFilter.label}
+            </span>
           </Button>
         </Dropdown>
         {filters
@@ -281,12 +283,12 @@ const ReportFilterBar: FC<Props> = ({
           showClose
         >
           <Button
-            as="span"
+            asChild
             type="default"
             size="tiny"
             icon={<IconPlus size="tiny" className={`text-scale-1100 `} />}
           >
-            Add filter
+            <span>Add filter</span>
           </Button>
         </Popover>
       </div>

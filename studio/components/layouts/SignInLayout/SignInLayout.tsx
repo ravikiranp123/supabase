@@ -1,7 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useStore } from 'hooks'
+import { useTheme } from 'common'
+import { useFlag, useStore } from 'hooks'
 import { usePushNext } from 'hooks/misc/useAutoAuthRedirect'
-import { IS_PLATFORM } from 'lib/constants'
+import { BASE_PATH, IS_PLATFORM } from 'lib/constants'
 import { auth, getReturnToPath, STORAGE_KEY } from 'lib/gotrue'
 import { observer } from 'mobx-react-lite'
 import Head from 'next/head'
@@ -26,9 +27,9 @@ const SignInLayout = ({
   children,
 }: PropsWithChildren<SignInLayoutProps>) => {
   const pushNext = usePushNext()
-  const { ui } = useStore()
   const queryClient = useQueryClient()
-  const { theme } = ui
+  const { isDarkMode } = useTheme()
+  const ongoingIncident = useFlag('ongoingIncident')
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search)
@@ -80,21 +81,27 @@ const SignInLayout = ({
         <Head>
           <script
             dangerouslySetInnerHTML={{
-              __html: `window._getReturnToPath = ${getReturnToPath.toString()};if (localStorage.getItem('${STORAGE_KEY}') && !(new URLSearchParams(location.search).has('next'))) {location.replace(window._getReturnToPath())}`,
+              __html: `window._getReturnToPath = ${getReturnToPath.toString()};if (localStorage.getItem('${STORAGE_KEY}') && !(new URLSearchParams(location.search).has('next'))) {location.replace('${
+                BASE_PATH ?? ''
+              }' + window._getReturnToPath())}`,
             }}
           />
         </Head>
       )}
 
       <div className="flex flex-col flex-1 bg-scale-100">
-        <div className="absolute top-0 w-full px-8 pt-6 mx-auto sm:px-6 lg:px-8">
+        <div className={`absolute top-0 w-full px-8 mx-auto sm:px-6 lg:px-8 ${ongoingIncident ? 'pt-16' : 'pt-6'}`}>
           <nav className="relative flex items-center justify-between sm:h-10">
             <div className="flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
               <div className="flex items-center justify-between w-full md:w-auto">
                 <Link href={logoLinkToMarketingSite ? 'https://supabase.com' : '/projects'}>
                   <a>
                     <Image
-                      src={theme == 'dark' ? '/img/supabase-dark.svg' : '/img/supabase-light.svg'}
+                      src={
+                        isDarkMode
+                          ? `${BASE_PATH}/img/supabase-dark.svg`
+                          : `${BASE_PATH}/img/supabase-light.svg`
+                      }
                       alt="Supabase Logo"
                       height={24}
                       width={120}
@@ -106,7 +113,7 @@ const SignInLayout = ({
 
             <div className="items-center hidden space-x-3 md:ml-10 md:flex md:pr-4">
               <Link href="https://supabase.com/docs">
-                <a target="_blank">
+                <a target="_blank" rel="noreferrer">
                   <Button type="default" icon={<IconFileText />}>
                     Documentation
                   </Button>

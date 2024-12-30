@@ -1,12 +1,9 @@
-import React, { useState } from 'react'
-import { IconAlertTriangle } from '../Icon/icons/IconAlertTriangle'
+'use client'
 
-import { IconInfo } from '../Icon/icons/IconInfo'
-import { IconX } from '../Icon/icons/IconX'
+import React, { useState } from 'react'
 
 import styleHandler from '../../lib/theme/styleHandler'
-import { IconAlertOctagon } from '../Icon/icons/IconAlertOctagon'
-import { IconCheckCircle } from '../Icon/icons/IconCheckCircle'
+import { AlertOctagon, CheckCircle, AlertTriangle, Info, X } from 'lucide-react'
 
 export interface AlertProps {
   variant?: AlertVariant
@@ -22,14 +19,17 @@ export interface AlertProps {
 export type AlertVariant = 'success' | 'danger' | 'warning' | 'info' | 'neutral'
 
 const icons: Record<AlertVariant, React.ReactElement> = {
-  danger: <IconAlertOctagon strokeWidth={1.5} size={18} />,
-  success: <IconCheckCircle strokeWidth={1.5} size={18} />,
-  warning: <IconAlertTriangle strokeWidth={1.5} size={18} />,
-  info: <IconInfo strokeWidth={1.5} size={18} />,
+  danger: <AlertOctagon strokeWidth={1.5} size={18} />,
+  success: <CheckCircle strokeWidth={1.5} size={18} />,
+  warning: <AlertTriangle strokeWidth={1.5} size={18} />,
+  info: <Info strokeWidth={1.5} size={18} />,
   neutral: <></>,
 }
 
-function Alert({
+/**
+ * @deprecated Use Alert_Shadcn_. For studio use Admonition
+ */
+export function Alert({
   variant = 'neutral',
   className,
   title,
@@ -74,7 +74,7 @@ function Alert({
               onClick={() => setVisible(false)}
               className={closeButtonClasses.join(' ')}
             >
-              <IconX strokeWidth={2} size={16} />
+              <X strokeWidth={2} size={16} />
             </button>
           )}
         </div>
@@ -82,5 +82,3 @@ function Alert({
     </>
   )
 }
-
-export default Alert

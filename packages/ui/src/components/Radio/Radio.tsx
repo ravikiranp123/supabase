@@ -1,13 +1,12 @@
-import React, { useEffect, useState, createRef } from 'react'
-import { FormLayout } from '../../lib/Layout/FormLayout'
-import { RadioContext } from './RadioContext'
+'use client'
 
-import { useFormContext } from '../Form/FormContext'
+import React, { useEffect, useState } from 'react'
 
-import defaultTheme from '../../lib/theme/defaultTheme'
+import { FormLayout } from '../../lib/Layout/FormLayout/FormLayout'
 import styleHandler from '../../lib/theme/styleHandler'
-
-import randomIdGenerator from './../../lib/utils/randomIdGenerator'
+import { useFormContext } from '../Form/FormContext'
+import { generateUID } from './../../lib/utils/randomIdGenerator'
+import { RadioContext } from './RadioContext'
 
 interface GroupProps {
   allowedValues?: any
@@ -34,6 +33,9 @@ interface GroupProps {
   labelsLayout?: 'horizontal' | 'vertical'
 }
 
+/**
+ * @deprecated Use ./RadioGroup_Shadcn_ instead
+ */
 function RadioGroup({
   id,
   layout,
@@ -147,8 +149,11 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   children?: React.ReactNode
 }
 
+/**
+ * @deprecated Use ./RadioGroupItem_Shadcn_ instead
+ */
 function Radio({
-  id = randomIdGenerator(),
+  id = generateUID(),
   disabled,
   value,
   label,

@@ -1,19 +1,21 @@
+'use client'
+
 import React, { useEffect, useState } from 'react'
-import { IconCopy } from '../Icon/icons/IconCopy'
-import { Button } from '../Button'
 
-import { FormLayout } from '../../lib/Layout/FormLayout'
-
+import { FormLayout } from '../../lib/Layout/FormLayout/FormLayout'
 import InputErrorIcon from '../../lib/Layout/InputErrorIcon'
 import InputIconContainer from '../../lib/Layout/InputIconContainer'
-
-import { HIDDEN_PLACEHOLDER } from './../../lib/constants'
-
+import { HIDDEN_PLACEHOLDER } from '../../lib/constants'
 import styleHandler from '../../lib/theme/styleHandler'
+import { cn } from '../../lib/utils/cn'
+import { Button } from '../Button'
 import { useFormContext } from '../Form/FormContext'
+import { Copy } from 'lucide-react'
 
 export interface Props
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onCopy'> {
+  inputClassName?: string
+  iconContainerClassName?: string
   copy?: boolean
   onCopy?: () => void
   defaultValue?: string | number
@@ -34,10 +36,15 @@ export interface Props
   validation?: (x: any) => void
 }
 
+/**
+ * @deprecated Use ./Input_shadcn_ instead or ./ui-patterns/data-inputs/input
+ */
 function Input({
   autoComplete,
   autoFocus,
   className,
+  inputClassName,
+  iconContainerClassName,
   copy,
   defaultValue,
   descriptionText,
@@ -77,7 +84,11 @@ function Input({
   if (values && !value) value = values[id || name]
 
   function handleBlurEvent(e: React.FocusEvent<HTMLInputElement>) {
-    if (handleBlur) handleBlur(e)
+    if (handleBlur) {
+      setTimeout(() => {
+        handleBlur(e)
+      }, 100)
+    }
     if (onBlur) onBlur(e)
   }
 
@@ -124,13 +135,14 @@ function Input({
     setHidden(false)
   }
 
-  let inputClasses = [__styles.base]
+  let inputClasses = ['peer/input', __styles.base]
 
   if (error) inputClasses.push(__styles.variants.error)
   if (!error) inputClasses.push(__styles.variants.standard)
-  if (icon) inputClasses.push(__styles.with_icon)
   if (size) inputClasses.push(__styles.size[size])
+  if (icon) inputClasses.push(__styles.with_icon)
   if (disabled) inputClasses.push(__styles.disabled)
+  if (inputClassName) inputClasses.push(inputClassName)
 
   return (
     <FormLayout
@@ -148,6 +160,7 @@ function Input({
     >
       <div className={__styles.container}>
         <input
+          data-size={size}
           autoComplete={autoComplete}
           autoFocus={autoFocus}
           defaultValue={defaultValue}
@@ -161,15 +174,15 @@ function Input({
           ref={inputRef}
           type={type}
           value={reveal && hidden ? HIDDEN_PLACEHOLDER : value}
-          className={inputClasses.join(' ')}
+          className={cn(inputClasses, size === 'tiny' && 'pl-8')}
           {...props}
         />
-        {icon && <InputIconContainer icon={icon} />}
+        {icon && <InputIconContainer size={size} icon={icon} className={iconContainerClassName} />}
         {copy || error || actions ? (
           <div className={__styles.actions_container}>
             {error && <InputErrorIcon size={size} />}
             {copy && !(reveal && hidden) ? (
-              <Button size="tiny" type="default" icon={<IconCopy />} onClick={() => _onCopy(value)}>
+              <Button size="tiny" type="default" icon={<Copy />} onClick={() => _onCopy(value)}>
                 {copyLabel}
               </Button>
             ) : null}
@@ -186,15 +199,19 @@ function Input({
   )
 }
 
+/**
+ * @deprecated Use ./TextArea_Shadcn_ instead
+ */
 export interface TextAreaProps
   extends Omit<React.InputHTMLAttributes<HTMLTextAreaElement>, 'size' | 'onCopy'> {
-  descriptionText?: string
+  textAreaClassName?: string
+  descriptionText?: string | React.ReactNode | undefined
   error?: string
   icon?: any
   label?: string | React.ReactNode
   afterLabel?: string
   beforeLabel?: string
-  labelOptional?: string
+  labelOptional?: string | React.ReactNode
   layout?: 'horizontal' | 'vertical'
   rows?: number
   limit?: number
@@ -208,6 +225,7 @@ export interface TextAreaProps
 
 function TextArea({
   className,
+  textAreaClassName,
   descriptionText,
   disabled,
   error,
@@ -260,7 +278,11 @@ function TextArea({
   if (values && !value) value = values[id || name]
 
   function handleBlurEvent(e: React.FocusEvent<HTMLTextAreaElement>) {
-    if (handleBlur) handleBlur(e)
+    if (handleBlur) {
+      setTimeout(() => {
+        handleBlur(e)
+      }, 100)
+    }
     if (onBlur) onBlur(e)
   }
 
@@ -291,6 +313,7 @@ function TextArea({
   if (icon) classes.push(__styles.with_icon)
   if (size) classes.push(__styles.size[size])
   if (disabled) classes.push(__styles.disabled)
+  if (textAreaClassName) classes.push(textAreaClassName)
 
   return (
     <FormLayout
@@ -321,20 +344,13 @@ function TextArea({
           className={classes.join(' ')}
           maxLength={limit}
           {...props}
-        >
-          {value}
-        </textarea>
+        />
         {copy || error || actions ? (
           <div className={__styles['textarea_actions_container']}>
             <div className={__styles['textarea_actions_container_items']}>
               {error && <InputErrorIcon size={size} />}
               {copy && (
-                <Button
-                  size="tiny"
-                  type="default"
-                  onClick={() => _onCopy(value)}
-                  icon={<IconCopy />}
-                >
+                <Button size="tiny" type="default" onClick={() => _onCopy(value)} icon={<Copy />}>
                   {copyLabel}
                 </Button>
               )}

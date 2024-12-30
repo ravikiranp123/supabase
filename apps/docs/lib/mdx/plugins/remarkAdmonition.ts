@@ -1,8 +1,8 @@
-import { Content, Paragraph, Parent } from 'mdast'
-import { MdxJsxFlowElement } from 'mdast-util-mdx'
-import { Node } from 'unist'
+import type { Content, Paragraph, Root } from 'mdast'
+import type { MdxJsxFlowElement } from 'mdast-util-mdx'
+import type { AdmonitionProps } from 'ui-patterns/admonition'
+import type { Node } from 'unist'
 import { visit } from 'unist-util-visit'
-import { AdmonitionProps } from '~/components/Admonition'
 
 /**
  * Transforms an `mkdocs-material` Admonition to a Supabase Admonition.
@@ -10,19 +10,22 @@ import { AdmonitionProps } from '~/components/Admonition'
  * https://squidfunk.github.io/mkdocs-material/reference/admonitions/
  */
 const remarkMkDocsAdmonition = function () {
-  return function transformer(root: Parent) {
-    visit(root, 'paragraph', (paragraph: Paragraph, index: number, parent: Parent) => {
+  return function transformer(root: Root) {
+    visit(root, 'paragraph', (paragraph: Paragraph, index: number, parent: Root) => {
       const [firstChild] = paragraph.children
 
       if (firstChild?.type === 'text') {
-        const match = firstChild.value.match(/^!!! ?(.*?)\n(.*)/s)
+        // Look for 3 '!', followed by an admonition type, followed by
+        // an optionally quoted title, followed by optional newlines of text
+        const match = firstChild.value.match(/^!!! ?("?)(.+)\1 ?\n?((?:.|\n)*)/)
 
         if (!match) {
           return
         }
 
-        // Extract the admonition type along with the remaining text
-        const [, type, value] = match
+        // Extract the admonition type, title, and remaining text
+        const [, , typeTitle, value] = match
+        const [, type, title] = typeTitle.match(/^(.+?) ?(?:"(.*)")?$/)
 
         // Rewrite the node's value to remove the admonition syntax
         firstChild.value = value
@@ -46,10 +49,20 @@ const remarkMkDocsAdmonition = function () {
           children,
         }
 
+        if (title) {
+          admonitionElement.attributes.push({
+            type: 'mdxJsxAttribute',
+            name: 'label',
+            value: title,
+          })
+        }
+
         // Overwrite original node with new element
         parent.children.splice(index, 1, admonitionElement)
       }
     })
+
+    return root
   }
 }
 
@@ -62,7 +75,7 @@ const remarkMkDocsAdmonition = function () {
  *
  * Splices the discovered siblings out of the original parent and returns them.
  */
-function extractLinkedSiblings(parent: Parent, node: Node, index: number, indentAmount = 4) {
+function extractLinkedSiblings(parent: Root, node: Node, index: number, indentAmount = 4) {
   const { column } = node.position.start
 
   let nextSibling: Content
@@ -98,7 +111,7 @@ function mapAdmonitionType(type: string): AdmonitionProps['type'] {
     case 'question':
     case 'info':
     default:
-      return 'info'
+      return 'note'
   }
 }
 

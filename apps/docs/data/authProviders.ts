@@ -50,6 +50,16 @@ const authProviders = [
     authType: 'social',
   },
   {
+    name: 'Figma',
+    logo: '/docs/img/icons/figma-icon',
+    href: '/guides/auth/social-login/auth-figma',
+    official: true,
+    supporter: 'Supabase',
+    platform: true,
+    selfHosted: true,
+    authType: 'social',
+  },
+  {
     name: 'GitHub',
     logo: '/docs/img/icons/github-icon',
     href: '/guides/auth/social-login/auth-github',
@@ -58,6 +68,7 @@ const authProviders = [
     platform: true,
     selfHosted: true,
     authType: 'social',
+    hasLightIcon: true,
   },
   {
     name: 'GitLab',
@@ -112,7 +123,7 @@ const authProviders = [
   {
     name: 'MessageBird',
     logo: '/docs/img/icons/messagebird-icon',
-    href: '/guides/auth/phone-login/messagebird',
+    href: '/guides/auth/phone-login?showSmsProvider=MessageBird',
     official: false,
     supporter: 'MessageBird',
     platform: true,
@@ -158,11 +169,22 @@ const authProviders = [
     platform: true,
     selfHosted: true,
     authType: 'social',
+    hasLightIcon: true,
   },
   {
     name: 'Twitch',
     logo: '/docs/img/icons/twitch-icon',
     href: '/guides/auth/social-login/auth-twitch',
+    official: true,
+    supporter: 'Supabase',
+    platform: true,
+    selfHosted: true,
+    authType: 'social',
+  },
+  {
+    name: 'WorkOS',
+    logo: '/docs/img/icons/workos-icon',
+    href: '/guides/auth/social-login/auth-workos',
     official: true,
     supporter: 'Supabase',
     platform: true,
@@ -182,7 +204,7 @@ const authProviders = [
   {
     name: 'Twilio',
     logo: '/docs/img/icons/twilio-icon',
-    href: '/guides/auth/phone-login/twilio',
+    href: '/guides/auth/phone-login?showSmsProvider=Twilio',
     official: true,
     supporter: 'Supabase',
     platform: true,
@@ -192,12 +214,13 @@ const authProviders = [
   {
     name: 'Vonage',
     logo: '/docs/img/icons/vonage-icon',
-    href: '/guides/auth/phone-login/vonage',
+    href: '/guides/auth/phone-login?showSmsProvider=Vonage',
     official: false,
     supporter: 'Supabase',
     platform: true,
     selfHosted: true,
     authType: 'phone',
+    hasLightIcon: true,
   },
 ]
 

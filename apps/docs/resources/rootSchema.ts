@@ -5,10 +5,16 @@ import {
   GraphQLString,
   printSchema,
 } from 'graphql'
+import { RootQueryTypeResolvers } from '~/__generated__/graphql'
+import { searchRoot } from './globalSearch/globalSearchResolver'
+import { GraphQLObjectTypeGuide } from './guide/guideSchema'
+import { GraphQLObjectTypeReferenceSDKFunction } from './reference/referenceSDKSchema'
 
-const GRAPHQL_FIELD_INTROSPECT = 'schema'
+const GRAPHQL_FIELD_INTROSPECT = 'schema' as const
 
-async function resolveIntrospect() {
+type IntrospectResolver = RootQueryTypeResolvers[typeof GRAPHQL_FIELD_INTROSPECT]
+
+const resolveIntrospect: IntrospectResolver = async () => {
   const schema = printSchema(rootGraphQLSchema)
   return schema
 }
@@ -26,6 +32,8 @@ export const rootGraphQLSchema = new GraphQLSchema({
     name: 'RootQueryType',
     fields: {
       ...introspectRoot,
+      ...searchRoot,
     },
   }),
+  types: [GraphQLObjectTypeGuide, GraphQLObjectTypeReferenceSDKFunction],
 })
